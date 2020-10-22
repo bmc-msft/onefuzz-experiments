@@ -74,6 +74,7 @@ OnefuzzTemplateNotification(
 ## Current Issues
 * Declaratively specifying the allowed values for enums, such as StatsFormat, is not supported.  Fields must currently use Str, which evaluates to Enum value during template rendering, is functional.
 * Existing templates automatically differentiate between windows and linux tasks.  This does not support differentiating between platforms automatically.
+* Default values are not provided to the user.  
 
 ### Implementation details
 * Example workflow to create a libfuzzer basic job:
