@@ -70,22 +70,15 @@ OnefuzzTemplateNotification(
 )
 ```
 
-
-## Implementation Notes
-
-### TODO
-* enums (StatsFormat)
-* platform discovery?  We auto-differentiate between windows and linux tasks
-  now
+## Current Issues
+* Declaratively specifying the allowed values for enums, such as StatsFormat, is not supported.  Fields must currently use Str, which evaluates to Enum value during template rendering, is functional.
+* Existing templates automatically differentiate between windows and linux tasks.  This does not support differentiating between platforms automatically.
 
 ### Implementation details
 * job\_id in the TaskConfig is can be an arbitrary UUID and is overwritten at
   template evaluation
 
-### Differences between this and `libfuzzer basic template`
-* While this can be used to define notifications as part of a template, the SDK will need to support adding additional notifications at runtime, similar to how `--notification_config` works today.
-
-## Items of note in the implementation
+### Items of note in the implementation
 * [templates/usertemplates.py](templates/usertemplates.py): This implements the 'onefuzz template libfuzzer basic'
 * [templates/models.py](templates/models.py): This implements the basic pydantic models used by this feature
 * [templates/template.py](templates/template.py): This builds the "what do I ask the user to provide" (OnefuzzTemplateRequest) and "Evaluate the template, given the OnefuzzTemplateRequest)"
