@@ -57,7 +57,7 @@ To support differentiating `always use "afl-linux" for tools` verses `ask what c
 
 ## Specifying Notifications in the Template
 
-The existing templates support adding a notification config on the command line, via `--notification_config`, but the templates themselves include default notifications by default.
+The existing templates support adding a notification config on the command line, via `--notification_config`, but the existing templates themselves do not include default notifications.
 
 Declarative job templates include optional support to configure notifications as part of the template, rather than requiring the user provide the configuration.
 
