@@ -179,7 +179,7 @@ TEMPLATES = {
             ),
             UserField(
                 name="target_env",
-                type=UserFieldType.ListStr,
+                type=UserFieldType.DictStr,
                 locations=[
                     UserFieldLocation(
                         op=UserFieldOperation.replace,

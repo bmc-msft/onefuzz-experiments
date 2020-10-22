@@ -75,12 +75,17 @@ OnefuzzTemplateNotification(
 * Existing templates automatically differentiate between windows and linux tasks.  This does not support differentiating between platforms automatically.
 
 ### Implementation details
+* Example workflow to create a libfuzzer basic job:
+    1. Build a `OnefuzzTemplateConfig` from the specified `OnefuzzTemplate`
+    1. SDK uses said `OnefuzzTemplateConfig` plus `argparse` to create a `OnefuzzTemplateRequest`
+    1. Render the `OnefuzzTemplate` using the specified `OnefuzzTemplateRequest` 
+    1. Use the rendered `OnefuzzTemplate` to create the job, tasks, and notifications
 * job\_id in the TaskConfig is can be an arbitrary UUID and is overwritten at
   template evaluation
 
 ### Items of note in the implementation
 * [templates/usertemplates.py](templates/usertemplates.py): This implements the 'onefuzz template libfuzzer basic'
-* [templates/models.py](templates/models.py): This implements the basic pydantic models used by this feature
+* [templates/models.py](templates/models.py): This implements the basic [pydantic](https://pydantic-docs.helpmanual.io/) models used by this feature
 * [templates/template.py](templates/template.py): This builds the "what do I ask the user to provide" (OnefuzzTemplateRequest) and "Evaluate the template, given the OnefuzzTemplateRequest)"
 * [main.py](main.py) this emulates what will be done first by the SDK, then later by the service
 
@@ -137,7 +142,7 @@ This is the `OnefuzzTemplateConfig` for `libfuzzer_basic` template, which the CL
         },
         {
             "name": "target_env",
-            "type": "ListStr",
+            "type": "DictStr",
             "required": false
         },
         {
