@@ -14,11 +14,12 @@ The form fields allow for 'add' or 'replace' of basic field data using [jsonpatc
 
 ## Example form fields
 
-This following field named `target_workers`, which is required to be an 'int', will replace the `target_workers` value of in the first task in the template.
+This following field named `target_workers`, which is required to be an 'int', will optionally (if the request includes it) replace the `target_workers` value of in the first task in the template.
 
 ```python
 UserField(
     name="target_workers",
+    required=False,
     type=UserFieldType.Int,
     locations=[
         UserFieldLocation(
