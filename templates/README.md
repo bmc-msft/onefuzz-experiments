@@ -29,6 +29,48 @@ UserField(
 )
 ```
 
+## Allowed Data Types
+As of right now, the data types allowed in configuring arbitrary components in the JobTemplate are:
+
+* bool
+* int
+* str
+* Dict\[str, str\]
+* List\[str\]
+
+## Referring to Tasks
+
+The mechanism to refer to pre-existing tasks, such as how `libfuzzer_crash_report` requires `libfuzzer_fuzz` as a prerequisite, is done via specifying the prerequisite task_id.
+
+To support such a reference in `OnefuzzTemplate`, specify the prerequisite TASK by the `u128` representation index in to the list of tasks.  Example, to refer to the first task, use:
+
+```python
+TaskConfig(
+    prereq_tasks=[UUID(int=0)],
+    ...
+)
+```
+
+## Hardcoded verses Runtime-specified container names
+
+To support differentiating `always use "afl-linux" for tools` verses `ask what container to use for setup`, if the container name is blank in the template, it will be provided as part of the `OnefuzzTemplateConfig` and in the resulting `OnefuzzTemplateRequest`.
+
+## Specifying Notifications in the Template
+
+The existing templates support adding a notification config on the command line, via `--notification_config`, but the templates themselves include default notifications by default.
+
+Declarative job templates include optional support to configure notifications as part of the template, rather than requiring the user provide the configuration.
+
+Example declarative job template that specifies using the aforementioned NotificationConfig for the `unique_reports` containers used in the Job.
+
+```python
+OnefuzzTemplateNotification(
+    container_type=ContainerType.unique_reports,
+    notification=NotificationConfig(config=TeamsTemplate(url="https://contoso.com/webhook-url-here")),
+)
+```
+
+
 ## Implementation Notes
 
 ### TODO
@@ -39,16 +81,6 @@ UserField(
 ### Implementation details
 * job\_id in the TaskConfig is can be an arbitrary UUID and is overwritten at
   template evaluation
-* To support back-referencing tasks, such as in TaskConfig.prereq\_tasks, use
-  the a hard-coded u128 representation of the task\_id as an index into the
-  task list.
-* To support hard-coding containers (such as 'afl-pp') rather than requiring
-  the request to define the containers is done by "If TaskContainer.name is
-  set, use it.  Else, user must define it"
-* The same container used for two different contexts (inputs in
-  libfuzzer\_fuzz and readonly\_inputs for libfuzzer\_coverage) isn't supported.
-  As is, this will require extending coverage type tasks to support inputs
-  and readonly\_inputs.
 
 ### Differences between this and `libfuzzer basic template`
 * While this can be used to define notifications as part of a template, the SDK will need to support adding additional notifications at runtime, similar to how `--notification_config` works today.
