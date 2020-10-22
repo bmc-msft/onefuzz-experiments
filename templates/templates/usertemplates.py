@@ -14,6 +14,229 @@ from .enums import UserFieldOperation, UserFieldType
 from .models import OnefuzzTemplate, UserField, UserFieldLocation
 
 TEMPLATES = {
+    "afl_basic": OnefuzzTemplate(
+        job=JobConfig(project="", name="", build="", duration=1),
+        tasks=[
+            TaskConfig(
+                job_id=(UUID(int=0)),
+                task=TaskDetails(
+                    type=TaskType.generic_supervisor,
+                    duration=1,
+                    target_exe="fuzz.exe",
+                    target_env={},
+                    target_options=[],
+                    supervisor_exe="{tools_dir}/afl-fuzz",
+                    supervisor_options=[
+                        "-d",
+                        "-i",
+                        "{input_corpus}",
+                        "-o",
+                        "{runtime_dir}",
+                        "--",
+                        "{target_exe}",
+                        "{target_options}",
+                    ],
+                    supervisor_input_marker="@@",
+                ),
+                pool=TaskPool(count=1, pool_name=""),
+                containers=[
+                    TaskContainers(name="afl-linux", type=ContainerType.tools),
+                    TaskContainers(name="", type=ContainerType.setup),
+                    TaskContainers(name="", type=ContainerType.crashes),
+                    TaskContainers(name="", type=ContainerType.inputs),
+                ],
+                tags={},
+            ),
+            TaskConfig(
+                job_id=UUID(int=0),
+                prereq_tasks=[UUID(int=0)],
+                task=TaskDetails(
+                    type=TaskType.generic_crash_report,
+                    duration=1,
+                    target_exe="fuzz.exe",
+                    target_env={},
+                    target_options=[],
+                    check_debugger=True,
+                ),
+                pool=TaskPool(count=1, pool_name=""),
+                containers=[
+                    TaskContainers(name="", type=ContainerType.setup),
+                    TaskContainers(name="", type=ContainerType.crashes),
+                    TaskContainers(name="", type=ContainerType.no_repro),
+                    TaskContainers(name="", type=ContainerType.reports),
+                    TaskContainers(name="", type=ContainerType.unique_reports),
+                ],
+                tags={},
+            ),
+        ],
+        notifications=[],
+        user_fields=[
+            UserField(
+                name="pool_name",
+                type=UserFieldType.Str,
+                required=True,
+                locations=[
+                    UserFieldLocation(
+                        op=UserFieldOperation.replace,
+                        path="/tasks/0/pool/pool_name",
+                    ),
+                    UserFieldLocation(
+                        op=UserFieldOperation.replace,
+                        path="/tasks/1/pool/pool_name",
+                    ),
+                ],
+            ),
+            UserField(
+                name="duration",
+                type=UserFieldType.Int,
+                locations=[
+                    UserFieldLocation(
+                        op=UserFieldOperation.replace,
+                        path="/tasks/0/task/duration",
+                    ),
+                    UserFieldLocation(
+                        op=UserFieldOperation.replace,
+                        path="/tasks/1/task/duration",
+                    ),
+                    UserFieldLocation(
+                        op=UserFieldOperation.replace, path="/job/duration"
+                    ),
+                ],
+            ),
+            UserField(
+                name="target_exe",
+                type=UserFieldType.Str,
+                required=False,
+                locations=[
+                    UserFieldLocation(
+                        op=UserFieldOperation.replace,
+                        path="/tasks/0/task/target_exe",
+                    ),
+                    UserFieldLocation(
+                        op=UserFieldOperation.replace,
+                        path="/tasks/1/task/target_exe",
+                    ),
+                ],
+            ),
+            UserField(
+                name="target_options",
+                type=UserFieldType.ListStr,
+                required=True,
+                locations=[
+                    UserFieldLocation(
+                        op=UserFieldOperation.replace,
+                        path="/tasks/0/task/target_options",
+                    ),
+                    UserFieldLocation(
+                        op=UserFieldOperation.replace,
+                        path="/tasks/1/task/target_options",
+                    ),
+                ],
+            ),
+            UserField(
+                name="supervisor_exe",
+                type=UserFieldType.Str,
+                required=True,
+                locations=[
+                    UserFieldLocation(
+                        op=UserFieldOperation.replace,
+                        path="/tasks/0/task/supervisor_exe",
+                    ),
+                ],
+            ),
+            UserField(
+                name="supervisor_input_marker",
+                type=UserFieldType.Str,
+                required=True,
+                locations=[
+                    UserFieldLocation(
+                        op=UserFieldOperation.replace,
+                        path="/tasks/0/task/supervisor_input_marker",
+                    ),
+                ],
+            ),
+            UserField(
+                name="supervisor_options",
+                type=UserFieldType.ListStr,
+                required=True,
+                locations=[
+                    UserFieldLocation(
+                        op=UserFieldOperation.replace,
+                        path="/tasks/0/task/supervisor_options",
+                    ),
+                ],
+            ),
+            UserField(
+                name="supervisor_env",
+                type=UserFieldType.DictStr,
+                required=True,
+                locations=[
+                    UserFieldLocation(
+                        op=UserFieldOperation.replace,
+                        path="/tasks/0/task/supervisor_env",
+                    ),
+                ],
+            ),
+            UserField(
+                name="vm_count",
+                type=UserFieldType.Int,
+                locations=[
+                    UserFieldLocation(
+                        op=UserFieldOperation.replace,
+                        path="/tasks/0/pool/count",
+                    ),
+                ],
+            ),
+            UserField(
+                name="check_retry_count",
+                type=UserFieldType.Int,
+                locations=[
+                    UserFieldLocation(
+                        op=UserFieldOperation.replace,
+                        path="/tasks/1/task/check_retry_count",
+                    ),
+                ],
+            ),
+            UserField(
+                name="afl_container",
+                type=UserFieldType.Str,
+                locations=[
+                    UserFieldLocation(
+                        op=UserFieldOperation.replace,
+                        path="/tasks/0/containers/0/name",
+                    ),
+                ],
+            ),
+            UserField(
+                name="reboot_after_setup",
+                type=UserFieldType.Bool,
+                locations=[
+                    UserFieldLocation(
+                        op=UserFieldOperation.replace,
+                        path="/tasks/0/task/reboot_after_setup",
+                    ),
+                    UserFieldLocation(
+                        op=UserFieldOperation.replace,
+                        path="/tasks/1/task/reboot_after_setup",
+                    ),
+                ],
+            ),
+            UserField(
+                name="tags",
+                type=UserFieldType.DictStr,
+                locations=[
+                    UserFieldLocation(
+                        op=UserFieldOperation.add,
+                        path="/tasks/0/tags",
+                    ),
+                    UserFieldLocation(
+                        op=UserFieldOperation.add,
+                        path="/tasks/1/tags",
+                    ),
+                ],
+            ),
+        ],
+    ),
     "libfuzzer_basic": OnefuzzTemplate(
         job=JobConfig(project="", name="", build="", duration=1),
         tasks=[
@@ -22,7 +245,7 @@ TEMPLATES = {
                 task=TaskDetails(
                     type=TaskType.libfuzzer_fuzz,
                     duration=1,
-                    target_exe="",
+                    target_exe="fuzz.exe",
                     target_env={},
                     target_options=[],
                 ),
@@ -40,7 +263,7 @@ TEMPLATES = {
                 task=TaskDetails(
                     type=TaskType.libfuzzer_crash_report,
                     duration=1,
-                    target_exe="",
+                    target_exe="fuzz.exe",
                     target_env={},
                     target_options=[],
                 ),
@@ -60,7 +283,7 @@ TEMPLATES = {
                 task=TaskDetails(
                     type=TaskType.libfuzzer_coverage,
                     duration=1,
-                    target_exe="",
+                    target_exe="fuzz.exe",
                     target_env={},
                     target_options=[],
                 ),
@@ -73,12 +296,7 @@ TEMPLATES = {
                 tags={},
             ),
         ],
-        notifications=[
-            # OnefuzzTemplateNotification(
-            #     container_type=ContainerType.unique_reports,
-            #     notification=NotificationConfig(config=TeamsTemplate(url="foo")),
-            # )
-        ],
+        notifications=[],
         user_fields=[
             UserField(
                 name="pool_name",
@@ -102,7 +320,6 @@ TEMPLATES = {
             UserField(
                 name="target_exe",
                 type=UserFieldType.Str,
-                required=True,
                 locations=[
                     UserFieldLocation(
                         op=UserFieldOperation.replace,
@@ -252,7 +469,7 @@ TEMPLATES = {
                 ],
             ),
         ],
-    )
+    ),
 }
 
 
