@@ -9,7 +9,7 @@ from onefuzztypes.models import (
     TaskConfig,
     TaskContainers,
 )
-from pydantic import BaseModel, root_validator, validator
+from pydantic import BaseModel, root_validator, validator, Field
 
 from .enums import UserFieldOperation, UserFieldType
 
@@ -25,6 +25,7 @@ class UserField(BaseModel):
     name: str
     type: UserFieldType
     locations: List[UserFieldLocation]
+    required: bool = Field(default=False)
 
     @validator("locations", allow_reuse=True)
     def check_locations(cls, value: List) -> List:
@@ -42,8 +43,7 @@ class OnefuzzTemplate(BaseModel):
     job: JobConfig
     tasks: List[TaskConfig]
     notifications: List[OnefuzzTemplateNotification]
-    required_fields: List[UserField]
-    optional_fields: List[UserField]
+    user_fields: List[UserField]
 
     @root_validator()
     def check_task_prereqs(cls, data: Dict) -> Dict:
@@ -61,9 +61,7 @@ class OnefuzzTemplate(BaseModel):
         seen = set()
         seen_path = set()
 
-        for entry in (
-            TEMPLATE_BASE_FIELDS + data["required_fields"] + data["optional_fields"]
-        ):
+        for entry in TEMPLATE_BASE_FIELDS + data["user_fields"]:
             # field names, which are sent to the user for filing out, must be specified
             # once and only once
             if entry.name in seen:

@@ -79,10 +79,11 @@ TEMPLATES = {
             #     notification=NotificationConfig(config=TeamsTemplate(url="foo")),
             # )
         ],
-        required_fields=[
+        user_fields=[
             UserField(
                 name="pool_name",
                 type=UserFieldType.Str,
+                required=True,
                 locations=[
                     UserFieldLocation(
                         op=UserFieldOperation.replace,
@@ -101,6 +102,7 @@ TEMPLATES = {
             UserField(
                 name="target_exe",
                 type=UserFieldType.Str,
+                required=True,
                 locations=[
                     UserFieldLocation(
                         op=UserFieldOperation.replace,
@@ -116,8 +118,6 @@ TEMPLATES = {
                     ),
                 ],
             ),
-        ],
-        optional_fields=[
             UserField(
                 name="duration",
                 type=UserFieldType.Int,

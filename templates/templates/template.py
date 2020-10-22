@@ -24,11 +24,8 @@ def template_container_types(template: OnefuzzTemplate) -> List[ContainerType]:
 
 def build_input_config(template: OnefuzzTemplate) -> OnefuzzTemplateConfig:
     user_fields = [
-        OnefuzzTemplateField(name=x.name, type=x.type, required=True)
-        for x in TEMPLATE_BASE_FIELDS + template.required_fields
-    ] + [
-        OnefuzzTemplateField(name=x.name, type=x.type, required=False)
-        for x in template.optional_fields
+        OnefuzzTemplateField(name=x.name, type=x.type, required=x.required)
+        for x in TEMPLATE_BASE_FIELDS + template.user_fields
     ]
     containers = template_container_types(template)
 
@@ -73,9 +70,7 @@ def render(
     seen = set()
 
     for name in request.user_fields:
-        for field in (
-            TEMPLATE_BASE_FIELDS + template.required_fields + template.optional_fields
-        ):
+        for field in TEMPLATE_BASE_FIELDS + template.user_fields:
             if field.name == name:
                 if name in seen:
                     raise ValueError(f"duplicate specification: {name}")
@@ -84,14 +79,12 @@ def render(
         if name not in seen:
             raise ValueError(f"extra field: {name}")
 
-    for field in TEMPLATE_BASE_FIELDS + template.required_fields:
+    for field in TEMPLATE_BASE_FIELDS + template.user_fields:
         if field.name not in request.user_fields:
-            raise ValueError(f"missing required field: {field.name}")
-        patches += build_patches(request.user_fields[field.name], field)
-
-    for field in template.optional_fields:
-        if field.name not in request.user_fields:
-            continue
+            if field.required:
+                raise ValueError(f"missing required field: {field.name}")
+            else:
+                continue
         patches += build_patches(request.user_fields[field.name], field)
 
     raw = json.loads(template.json())
